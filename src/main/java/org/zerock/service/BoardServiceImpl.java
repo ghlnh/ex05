@@ -2,10 +2,13 @@ package org.zerock.service;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.domain.BoardVO;
 import org.zerock.domain.Criteria;
+import org.zerock.mapper.BoardAttachMapper;
 import org.zerock.mapper.BoardMapper;
 
 import lombok.AllArgsConstructor;
@@ -22,6 +25,9 @@ public class BoardServiceImpl implements BoardService {
 	//spring 4.3 이상에서 단일 파라미터를 받는 생성자의 겨우 필요한 자동파라미터를 자동 주입해줌
 	@Setter(onMethod_= @Autowired)
 	private BoardMapper mapper;
+	
+	@Setter(onMethod_=@Autowired)
+	private BoardAttachMapper attachMapper;
 	
 	@Override
 	public BoardVO get(Long bno) {
@@ -46,6 +52,7 @@ public class BoardServiceImpl implements BoardService {
 		return mapper.update(board) == 1;
 	}
 	
+	@Transactional
 	@Override
 	//필요하다면 예외처리나 void대신 int타입을 이용해서 사용 가능
 	//ex) mapper.insertSelectKey()반환 값 int 사용하려고 int 리턴하는 쪽으로 작성
@@ -53,6 +60,14 @@ public class BoardServiceImpl implements BoardService {
 		System.out.println("register....." + board);
 		mapper.insertSelectKey(board);
 		
+		if(board.getAttachList() == null || board.getAttachList().size() <=0) {
+			return;
+		}
+		
+		board.getAttachList().forEach(attach -> {
+			attach.setBno(board.getBno());
+			attachMapper.insert(attach);
+			});
 	}
 	
 	@Override

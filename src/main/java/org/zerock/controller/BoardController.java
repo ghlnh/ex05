@@ -54,10 +54,20 @@ public class BoardController {
 	 추가적으로 새롭게 등록된 게시물의 번호를 같이 전달하기 위해
 	RedirectAttributes 파라미터로 지정 */
 	public String register(BoardVO board, RedirectAttributes rttr) {
+		System.out.println("==============================");
 		System.out.println("register: " + board);
 		
-		service.register(board);
-		rttr.addFlashAttribute("result", board.getBno());
+		if (board.getAttachList() !=null) {
+			board.getAttachList().forEach(attach -> System.out.println(attach));
+		}
+		
+		System.out.println("==============================");
+		
+		
+		  service.register(board); 
+		  
+		  rttr.addFlashAttribute("result", board.getBno());
+		 
 		
 		//스프링 MVC가 내부적으로 response.sendRedirect()처리해주기 위해서 "redirect:" 사용
 		return "redirect:/board/list";
