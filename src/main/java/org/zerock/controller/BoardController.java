@@ -1,6 +1,9 @@
 package org.zerock.controller;
 
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -23,7 +26,6 @@ import org.zerock.service.BoardService;
 
 import jdk.internal.org.jline.utils.Log;
 import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j;
 
 //@Controller로 스프링의 빈으로 인식 할 수 있게 함
 @Controller
@@ -109,9 +111,16 @@ public class BoardController {
 	@PostMapping("/remove")
 	public String remove(@RequestParam("bno") Long bno
 							,RedirectAttributes rttr
-							,@ModelAttribute("cri") Criteria cri) {
+							,Criteria cri) {
 		System.out.println("remove........" + bno);
+		
+		List<BoardAttachVO> attachList = service.getAttachList(bno);
+		
 		if(service.remove(bno)) {
+			
+			//delete Attach Files
+			deleteFiles(attachList);
+			
 			rttr.addFlashAttribute("result", "success");
 			/*
 			 * rttr.addAttribute("pageNum", cri.getPageNum()); rttr.addAttribute("amout",
@@ -133,9 +142,36 @@ public class BoardController {
 	@ResponseBody
 	public ResponseEntity<List<BoardAttachVO>> getAttachList(Long bno) {
 		System.out.println("getAttachList" + bno);
-		return new ResponseEntity<List<BoardAttachVO>>(service.getAttachlist(bno), HttpStatus.OK);
+		return new ResponseEntity<List<BoardAttachVO>>(service.getAttachList(bno), HttpStatus.OK);
 	}
 	
+	private void deleteFiles(List<BoardAttachVO> attachList) {
+		
+		if(attachList == null || attachList.size() ==0) {
+			return;
+		}
+		
+		System.out.println("delete attach files..............");
+		
+		System.out.println(attachList);
+		
+		attachList.forEach(attach -> {
+			try {
+				Path file = Paths.get("C:\\upload\\" +attach.getUploadPath()+ "\\" + attach.getUuid()+ "_" + attach.getFileName());
+				
+				Files.deleteIfExists(file);
+				
+				if(Files.probeContentType(file).startsWith("image")) {
+					
+					Path thumbNail = Paths.get("C:\\upload\\" + attach.getUploadPath()+ "\\s_" + attach.getUuid() + "_" + attach.getFileName());
+					
+					Files.delete(thumbNail);
+				}
+			} catch (Exception e) {
+				Log.error("delete file error" + e.getMessage());
+			}//end catch
+		});//end foreachd
+	}
 	
 }
 //org.zerock.controller 패키지는 servlet-context.xml에 기본으로 설정되어 있어 별도의 설정 필요X

@@ -71,9 +71,13 @@ public class BoardServiceImpl implements BoardService {
 			});
 	}
 	
+	@Transactional
 	@Override
 	public boolean remove(Long bno) {
 		System.out.println("remove....." + bno);
+		
+		attachMapper.deleteAll(bno);
+		
 		return mapper.delete(bno) == 1;
 	}
 	
@@ -84,7 +88,7 @@ public class BoardServiceImpl implements BoardService {
 	}
 	
 	@Override
-	public List<BoardAttachVO> getAttachlist(Long bno) {
+	public List<BoardAttachVO> getAttachList(Long bno) {
 		System.out.println("get Attach list by bno" + bno);
 		return attachMapper.findByBno(bno);
 	}

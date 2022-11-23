@@ -23,6 +23,6 @@ public interface BoardService {
 	
 	public int getTotal(Criteria cri);
 	
-	public List<BoardAttachVO> getAttachlist(Long bno);
+	public List<BoardAttachVO> getAttachList(Long bno);
 	
 }
