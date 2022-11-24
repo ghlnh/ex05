@@ -47,10 +47,26 @@ public class BoardServiceImpl implements BoardService {
 		return mapper.getListWithPaging(cri);
 	}
 	
+	@Transactional
 	@Override
 	public boolean modify(BoardVO board) {
 		System.out.println("modify....." + board);
-		return mapper.update(board) == 1;
+		
+		attachMapper.deleteAll(board.getBno());
+		
+		boolean modifyResult = mapper.update(board) == 1;
+		
+		if(modifyResult && board.getAttachList() != null && board.getAttachList().size() >0) {
+			
+			board.getAttachList().forEach(attach -> {
+				
+				attach.setBno(board.getBno());
+				
+				attachMapper.insert(attach);
+			});
+		}
+		
+		return modifyResult;
 	}
 	
 	@Transactional

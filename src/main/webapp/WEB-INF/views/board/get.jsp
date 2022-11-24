@@ -428,6 +428,7 @@ $(document).ready(function () {
 
 </script>
 
+<!--첨부 파일 보여주는 작업  -->
 <script>
 $(document).ready(function() {
 	(function() {
